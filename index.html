@@ -43,8 +43,8 @@
                     <span class="say">Just saying... you're pretty awesome ❤️</span><br>
                     <span class="say">Sending good vibes and maybe a wink 😏</span><br>
                     <span class="say"> i love you so much...🫶</span><br>
-                    <span class="say">can i get the pleasure to be your man, your partner, your partner, your home, your
-                        comfartable space and so more...?</span><br>
+                    <span class="say">And can i get the pleasure to be your man, your partner, your partner, your home, your
+                        comfortable space...?</span><br>
 
                 </div>
             </div>
@@ -69,11 +69,25 @@
             canvas.attr("width", width);
             canvas.attr("height", height);
 
+            var scaleX = width / 1100;
+            var scaleY = height / 680;
+
+            function scaleArray(arr, sx, sy) {
+                for (var i = 0; i < arr.length; i++) {
+                    if (Array.isArray(arr[i])) {
+                        scaleArray(arr[i], sx, sy);
+                    } else if (typeof arr[i] === 'number') {
+                        if (i % 2 === 0) arr[i] *= sx; // even index: x
+                        else arr[i] *= sy; // odd index: y
+                    }
+                }
+            }
+
             var opts = {
                 seed: {
-                    x: width / 2 - 20,
+                    x: (width / 2 - 20) * scaleX,
                     color: "rgb(190, 26, 37)",
-                    scale: 2
+                    scale: 2 * Math.min(scaleX, scaleY)
                 },
                 branch: [
                     [535, 680, 570, 250, 500, 200, 30, 100, [
@@ -95,15 +109,17 @@
                 ],
                 bloom: {
                     num: 700,
-                    width: 1080,
-                    height: 650,
+                    width: 1080 * scaleX,
+                    height: 650 * scaleY,
                 },
                 footer: {
-                    width: 1200,
+                    width: 1200 * scaleX,
                     height: 5,
                     speed: 10,
                 }
-            }
+            };
+
+            scaleArray(opts.branch, scaleX, scaleY);
 
             var tree = new Tree(canvas[0], width, height, opts);
             var seed = tree.seed;
@@ -159,13 +175,13 @@
             }));
 
             var moveAnimate = eval(Jscex.compile("async", function () {
-                tree.snapshot("p1", 240, 0, 610, 680);
-                while (tree.move("p1", 500, 0)) {
+                tree.snapshot("p1", 240 * scaleX, 0, 610 * scaleX, 680 * scaleY);
+                while (tree.move("p1", 500 * scaleX, 0)) {
                     foot.draw();
                     $await(Jscex.Async.sleep(10));
                 }
                 foot.draw();
-                tree.snapshot("p2", 500, 0, 610, 680);
+                tree.snapshot("p2", 500 * scaleX, 0, 610 * scaleX, 680 * scaleY);
 
                 canvas.parent().css("background", "url(" + tree.toDataURL('image/png') + ")");
                 canvas.css("background", "#ffe");
